@@ -5,6 +5,9 @@ import KeyboardView from './KeyboardView';
 import ProofView from './ProofView';
 import PuzzleView from './PuzzleView';
 import { useSindri } from '../hooks/useSindri';
+import { VerifyTransactionInfo } from "zkverifyjs";
+import { useZkVerify } from '../hooks/useZkVerify';
+import { useAccount } from "../contexts/AccountContext";
 
 const PlayPannel: React.FC = () => {
   const [puzzle, setPuzzle] = useState<number[]>(Array(81).fill(0));
@@ -18,6 +21,8 @@ const PlayPannel: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const useSindriFlag = process.env.NEXT_PUBLIC_USE_SINDRI === 'true';
+  const { selectedAccount } = useAccount();
+  const { verifying, verified, error:x, onVerifyProof } = useZkVerify(selectedAccount);
 
   useEffect(() => {
     if (error) {
@@ -79,39 +84,49 @@ const PlayPannel: React.FC = () => {
   const onGenerateProof = async () => {
     setProofCalculating(true);
     try {
-      const isSolutionComplete = solution.every(value => value !== 0);
-      if (!isSolutionComplete) {
-        throw new Error("The puzzle solution is incomplete. Please solve the puzzle before generating a proof.");
-      }
+      // const isSolutionComplete = solution.every(value => value !== 0);
+      // if (!isSolutionComplete) {
+      //   throw new Error("The puzzle solution is incomplete. Please solve the puzzle before generating a proof.");
+      // }
 
-      const packedPuzzle = packDigits(puzzle);
+      // const packedPuzzle = packDigits(puzzle);
 
       if (useSindriFlag) {
-        await generateProof(packedPuzzle, solution);
+       // await generateProof(packedPuzzle, solution);
       } else {
+        
 
         const input = {
-          packedPuzzle: packedPuzzle,
-          solution: solution,
+         
+          "a": 3, 
+          "b": 11
         };
-
+  
+        
         // @ts-expect-error Global snarkjs usage from `public/snarkjs.min.js`
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-          input,
+          {a: 3, b: 11},
           'sudoku.wasm',
           'sudoku_1.zkey'
         );
+        console.log("hello", publicSignals[0]);
 
         const circuitOutputSignal = publicSignals[0];
-        if (circuitOutputSignal === '1') {
-          setProof(JSON.stringify(proof));
-          messageApi.success(
-            'Proof generated using snarkjs. You can now show that you have solved this puzzle without sharing the solution.',
-            5
-          );
-        } else {
-          throw new Error("Your solution isn't correct. Please solve the puzzle correctly!");
-        }
+        console.log("circuitOutputSignal", circuitOutputSignal);
+        // if (circuitOutputSignal === '1') {
+        //   setProof(JSON.stringify(proof));
+        //   messageApi.success(
+        //     'Proof generated using snarkjs. You can now show that you have solved this puzzle without sharing the solution.',
+        //     5
+        //   );
+        // } else {
+        //   throw new Error("Your solution isn't correct. Please solve the puzzle correctly!");
+        // }
+
+        console.log("proof", proof);
+        setProof(JSON.stringify(proof));
+      
+
       }
     } catch (error) {
       messageApi.error(

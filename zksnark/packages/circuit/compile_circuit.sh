@@ -39,8 +39,8 @@ mv ${CIRCUIT_NAME}_verify_key.json ${OUTPUT_DIR}/
 
 # Cleanup
 echo "Cleaning up intermediate files..."
-rm ${CIRCUIT_NAME}.r1cs
-rm ${CIRCUIT_NAME}.sym
-rm ${CIRCUIT_NAME}_0.zkey
+#rm ${CIRCUIT_NAME}.r1cs
+#rm ${CIRCUIT_NAME}.sym
+#rm ${CIRCUIT_NAME}_0.zkey
 
 echo "Process completed successfully!"

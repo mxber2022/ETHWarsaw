@@ -5,10 +5,11 @@ import PuzzleView from './PuzzleView';
 import { useZkVerify } from '../hooks/useZkVerify';
 import { useAccount } from "../contexts/AccountContext";
 import { VerifyTransactionInfo } from "zkverifyjs";
+const snarkjs = require("snarkjs");
 
 export default function VerifyPannel() {
   const { selectedAccount } = useAccount();
-  const [puzzle, setPuzzle] = useState<number[]>(Array(81).fill(0));
+  const [puzzle, setPuzzle] = useState<number[]>(Array(1).fill(0));
   const [proof, setProof] = useState<string>('');
   const puzzleFile = useRef<HTMLInputElement | null>(null);
   const proofFile = useRef<HTMLInputElement | null>(null);
@@ -47,13 +48,14 @@ export default function VerifyPannel() {
           try {
             const fileContent = JSON.parse(e.target.result as string);
             if (event.target === puzzleFile.current) {
-              if (fileContent.length === 81) {
+              if (fileContent.length ) {
                 setPuzzle(fileContent);
               } else {
                 message.error('Selected file is not a valid puzzle file!');
               }
             } else if (event.target === proofFile.current) {
               setProof(JSON.stringify(fileContent));
+              
             }
           } catch (error) {
             message.error('You selected the wrong file!');
@@ -63,7 +65,7 @@ export default function VerifyPannel() {
       fileReader.readAsText(file, 'UTF-8');
     }
   };
-
+  console.log("puzzle", puzzle)
   const downloadTransactionInfo = (transactionInfo: VerifyTransactionInfo) => {
     const blob = new Blob([JSON.stringify(transactionInfo, null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
@@ -82,11 +84,17 @@ export default function VerifyPannel() {
       const parsedProof = JSON.parse(proof);
       proofData = JSON.stringify(parsedProof.proof);
       vkey = parsedProof.verification_key;
+      console.log(vkey);
     } else {
       vkey = await fetch('sudoku_verify_key.json').then(res => res.json());
+      console.log("v",vkey);
     }
 
-    const transactionInfo = await onVerifyProof(proofData, puzzle, vkey);
+    const { proof: pf, publicSignals: ps } = await snarkjs.groth16.fullProve({a: 3, b: 11}, "sudoku.wasm", "sudoku_1.zkey");
+    const res = await snarkjs.groth16.verify(vkey, ps, pf);
+    console.log("res", res);
+
+    const transactionInfo = await onVerifyProof(JSON.stringify(pf), ps, vkey);
     if (transactionInfo) {
       message.success(`Verified Successfully on zkVerify - AttestationId: ${transactionInfo.attestationId}`);
       downloadTransactionInfo(transactionInfo);

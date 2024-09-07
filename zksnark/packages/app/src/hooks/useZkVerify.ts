@@ -24,8 +24,9 @@ export function useZkVerify(selectedAccount: string | null) {
         throw new Error('No account connected');
       }
 
-      const packedPuzzle = packDigits(puzzle);
-      const publicSignals = ['1', ...packedPuzzle.map((p) => p.toString())];
+      const packedPuzzle = puzzle;
+      //const publicSignals = ['1', ...packedPuzzle.map((p) => p.toString())];
+      const publicSignals = packedPuzzle
       const proofData = JSON.parse(proof);
 
       let zkVerifySession;
