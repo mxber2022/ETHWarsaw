@@ -13,9 +13,6 @@ import {ethers} from "ethers"
 const snarkjs = require("snarkjs");
 
 const PlayPannel: React.FC = () => {
-  const [puzzle, setPuzzle] = useState<number[]>(Array(81).fill(0));
-  const [solution, setSolution] = useState<number[]>(Array(81).fill(0));
-  const [selectedCellIndex, setSelectedCellIndex] = useState<number>(-1);
 
   const [proof, setProof] = useState<string>('');
   const [proofCalculating, setProofCalculating] = useState<boolean>(false);
@@ -27,7 +24,8 @@ const PlayPannel: React.FC = () => {
   const { selectedAccount } = useAccount();
   const { verifying, verified, error:x, onVerifyProof } = useZkVerify(selectedAccount);
 
-  const { sdk, connected, connecting, provider, chainId } = useSDK(); 
+  const { sdk, connected, connecting, provider, chainId, account } = useSDK(); 
+  const [feedback, setFeedback] = useState<string>('');
 
   console.log("provider", provider);
   console.log("connected", connected);
@@ -48,45 +46,6 @@ const PlayPannel: React.FC = () => {
     }
   }, [sindriProof]);
 
-  const onKeyButtonClick = (value: number) => {
-    if (selectedCellIndex === -1) return;
-    if (puzzle[selectedCellIndex] > 0) return;
-
-    const newSolution = [...solution];
-    newSolution[selectedCellIndex] = value;
-    setSolution(newSolution);
-  };
-
-  const onCellClick = (index: number) => {
-    setSelectedCellIndex(index);
-  };
-
-  const onNewPuzzle = () => {
-    const newPuzzle = generatePuzzle();
-    setPuzzle(newPuzzle);
-    setSolution(Array(81).fill(0));
-    setSelectedCellIndex(-1);
-  };
-
-  const onSolvePuzzle = () => {
-    const solution = getSolutionOfPuzzle(puzzle);
-    setSolution(solution);
-  };
-
-  const onEraseSolution = () => {
-    setSolution(Array(81).fill(0));
-    setSelectedCellIndex(-1);
-  };
-
-  const onSavePuzzle = () => {
-    const puzzleData = JSON.stringify(puzzle);
-    const blob = new Blob([puzzleData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = 'puzzle.json';
-    link.href = url;
-    link.click();
-  };
 
   const downloadTransactionInfo = (transactionInfo: VerifyTransactionInfo) => {
     const blob = new Blob([JSON.stringify(transactionInfo, null, 2)], { type: 'application/json' });
@@ -102,28 +61,36 @@ const PlayPannel: React.FC = () => {
     event.preventDefault();
     setProofCalculating(true);
     try {
-      // const isSolutionComplete = solution.every(value => value !== 0);
-      // if (!isSolutionComplete) {
-      //   throw new Error("The puzzle solution is incomplete. Please solve the puzzle before generating a proof.");
-      // }
-
-      // const packedPuzzle = packDigits(puzzle);
-
       if (useSindriFlag) {
-       // await generateProof(packedPuzzle, solution);
-      } else {
-        
+      
+      } else 
+      {
+      console.log("b", feedback);
+      console.log("account",account)
 
-        const input = {
+  
+    
+      // Use TextEncoder to get bytes from the string
+      const encoder = new TextEncoder();
+      const byteArray = encoder.encode(feedback);
+      let hex='';
+      // Convert each byte to its hexadecimal representation
+      for (let i = 0; i < byteArray.length; i++) {
+        hex += byteArray?.[i].toString(16).padStart(2, '0');
+      }
+    
+      console.log("hex", hex);
+      const feed_back = parseInt(hex, 16);
+      const input = {
          
-          "a": 3, 
-          "b": 11
+          "a": account, 
+          "b": feed_back
         };
   
         console.log("hello");
         
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-          {a: 3, b: 1},
+          input,
           'sudoku.wasm',
           'sudoku_1.zkey'
         );
@@ -131,15 +98,6 @@ const PlayPannel: React.FC = () => {
 
         const circuitOutputSignal = publicSignals[0];
         console.log("circuitOutputSignal", circuitOutputSignal);
-        // if (circuitOutputSignal === '1') {
-        //   setProof(JSON.stringify(proof));
-        //   messageApi.success(
-        //     'Proof generated using snarkjs. You can now show that you have solved this puzzle without sharing the solution.',
-        //     5
-        //   );
-        // } else {
-        //   throw new Error("Your solution isn't correct. Please solve the puzzle correctly!");
-        // }
 
         console.log("proof", proof);
         setProof(JSON.stringify(proof));
@@ -156,7 +114,7 @@ const PlayPannel: React.FC = () => {
             console.log("v",vkey);
           }
 
-          const { proof: pf, publicSignals: ps } = await snarkjs.groth16.fullProve({a: 3, b: 1}, "sudoku.wasm", "sudoku_1.zkey");
+          const { proof: pf, publicSignals: ps } = await snarkjs.groth16.fullProve(input, "sudoku.wasm", "sudoku_1.zkey");
           const res = await snarkjs.groth16.verify(vkey, ps, pf);
           console.log("res", res);
 
@@ -187,18 +145,9 @@ const PlayPannel: React.FC = () => {
 
 
   async function test(attestationId: any, leaf: any, merklePath: any, leafCount: any, index: any) {
-    // Initialize Infura provider
+ 
     const provider = new ethers.providers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/kaFl069xyvy3np41aiUXwjULZrF67--t");
     console.log('Provider:', provider);
-
-    // Create a signer (Infura does not provide a signer, so this part is not correct)
-    // We need MetaMask or a private key for signing transactions, not an Infura provider
-    // The following line will cause an issue
-    // const signer = provider.getSigner(); // This will not work with JsonRpcProvider
-
-    // Correct approach: Use a Web3Provider with MetaMask for transactions
-    // const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-    // console.log('Signer:', signer);
 
     const abi = [
         'function callVerifyProofAttestation(uint256 _attestationId, bytes32 _leaf, bytes32[] calldata _merklePath, uint256 _leafCount, uint256 _index) external returns (bool)'
@@ -209,11 +158,11 @@ const PlayPannel: React.FC = () => {
     try {
         // Populate the transaction data
         const txRequest = await contract.populateTransaction.callVerifyProofAttestation(
-            "7013",
-            "0x4acd015d47415fd5d2b41660b5c9b9e9039f6b837a726cd223d5a34c3b08e553",
+            attestationId,
+            leaf,
             [],
-            1,
-            0
+            leafCount,
+            index
         );
 
         // Use MetaMask provider to sign and send the transaction
@@ -241,22 +190,8 @@ const PlayPannel: React.FC = () => {
     }
 }
 
-  const onSaveProof = () => {
-    if (proof === '') {
-      messageApi.error('Please generate proof for your solution!');
-      return;
-    }
-
-    const blob = new Blob([proof], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = 'proof.json';
-    link.href = url;
-    link.click();
-  };
-
-  const [feedback, setFeedback] = useState<string>('');
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    
     setFeedback(event.target.value);
   };
 
