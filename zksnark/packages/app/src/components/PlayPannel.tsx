@@ -8,6 +8,7 @@ import { useSindri } from '../hooks/useSindri';
 import { VerifyTransactionInfo } from "zkverifyjs";
 import { useZkVerify } from '../hooks/useZkVerify';
 import { useAccount } from "../contexts/AccountContext";
+const snarkjs = require("snarkjs");
 
 const PlayPannel: React.FC = () => {
   const [puzzle, setPuzzle] = useState<number[]>(Array(81).fill(0));
@@ -81,7 +82,18 @@ const PlayPannel: React.FC = () => {
     link.click();
   };
 
-  const onGenerateProof = async () => {
+  const downloadTransactionInfo = (transactionInfo: VerifyTransactionInfo) => {
+    const blob = new Blob([JSON.stringify(transactionInfo, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `zkverify-${transactionInfo.attestationId}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const onGenerateProof = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setProofCalculating(true);
     try {
       // const isSolutionComplete = solution.every(value => value !== 0);
@@ -103,7 +115,7 @@ const PlayPannel: React.FC = () => {
         };
   
         console.log("hello");
-        // @ts-expect-error Global snarkjs usage from `public/snarkjs.min.js`
+        
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
           {a: 3, b: 1},
           'sudoku.wasm',
@@ -125,6 +137,32 @@ const PlayPannel: React.FC = () => {
 
         console.log("proof", proof);
         setProof(JSON.stringify(proof));
+
+        /*
+          integrate
+        */
+
+          let vkey;
+          if (useSindriFlag && proof) {
+            console.log(vkey);
+          } else {
+            vkey = await fetch('sudoku_verify_key.json').then(res => res.json());
+            console.log("v",vkey);
+          }
+
+          const { proof: pf, publicSignals: ps } = await snarkjs.groth16.fullProve({a: 3, b: 1}, "sudoku.wasm", "sudoku_1.zkey");
+          const res = await snarkjs.groth16.verify(vkey, ps, pf);
+          console.log("res", res);
+
+          const calldata = await snarkjs.groth16.exportSolidityCallData(pf,ps);
+          console.log("calldata", calldata);
+
+          const transactionInfo = await onVerifyProof(JSON.stringify(pf), ps, vkey);
+          if (transactionInfo) {
+            message.success(`Verified Successfully on zkVerify - AttestationId: ${transactionInfo.attestationId}`);
+            //downloadTransactionInfo(transactionInfo);
+            console.log("transactionInfo: ", transactionInfo)
+          }
       
 
       }
@@ -152,18 +190,23 @@ const PlayPannel: React.FC = () => {
     link.click();
   };
 
+  const [feedback, setFeedback] = useState<string>('');
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFeedback(event.target.value);
+  };
+
   return (
     <>
       {contextHolder}
       <Row justify="center">
         <Col>
-          <Typography.Title level={3}>PLAY</Typography.Title>
+          <Typography.Title level={3}></Typography.Title>
         </Col>
       </Row>
       <Spin spinning={proofCalculating || proofGenerating} tip="Proof generating..." size="large">
-        <Card title="Puzzle">
+        <Card title="Enter Feedback">
           <Row>
-            <Col span={20}>
+            {/* <Col span={20}>
               <PuzzleView
                 puzzle={puzzle}
                 solution={solution}
@@ -173,9 +216,40 @@ const PlayPannel: React.FC = () => {
             </Col>
             <Col span={4}>
               <KeyboardView onButtonClick={onKeyButtonClick} />
-            </Col>
+            </Col> */}
+
+<form onSubmit={onGenerateProof} style={{ backgroundColor: '#141414', color: 'black', borderRadius: '8px' }}>
+  <div>
+    <textarea
+      id="feedback"
+      name="feedback"
+      value={feedback}
+      onChange={handleChange}
+      rows={4}
+      cols={50}
+      placeholder="Type your feedback here..."
+      required
+      style={{ backgroundColor: '#141414', color: 'white', padding: '10px', borderRadius: '5px', border: '1px solid white' }}
+    />
+  </div>
+  <button
+    type="submit"
+    style={{
+      backgroundColor: 'white',
+      color: '#141414',
+      padding: '10px 20px',
+      marginTop: '10px',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    }}
+  >
+    Submit
+  </button>
+</form>
+
           </Row>
-          <Row gutter={20} justify="center" style={{ marginTop: 10 }}>
+          {/* <Row gutter={20} justify="center" style={{ marginTop: 10 }}>
             <Col>
               <Button type="primary" onClick={onNewPuzzle}>
                 New Puzzle
@@ -196,20 +270,20 @@ const PlayPannel: React.FC = () => {
                 Save Puzzle
               </Button>
             </Col>
-          </Row>
+          </Row> */}
         </Card>
-        <Card title="Proof" style={{ marginTop: 10 }}>
+        <Card title="Status" style={{ marginTop: 10 }}>
           <ProofView proof={proof} disabled={true} />
           <Row gutter={20} justify="center" style={{ marginTop: 10 }}>
             <Col>
-              <Button type="primary" onClick={onGenerateProof}>
+              {/* <Button type="primary" onClick={onGenerateProof}>
                 Generate Proof 
-              </Button>
+              </Button> */}
             </Col>
             <Col>
-              <Button type="primary" onClick={onSaveProof}>
+              {/* <Button type="primary" onClick={onSaveProof}>
                 Save Proof
-              </Button>
+              </Button> */}
             </Col>
           </Row>
         </Card>

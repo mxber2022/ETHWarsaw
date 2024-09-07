@@ -10,7 +10,7 @@ import {
 } from '../Constants';
 import logo from '../images/sudoku.png';
 import ConnectWalletButton from '../components/ConnectWalletButton';
-
+import { METAMASK } from "../../../app/pages/meta";
 const GithubOutlined = dynamic(() => import('@ant-design/icons').then(mod => mod.GithubOutlined), { ssr: false });
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -74,6 +74,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                                 </a> */}
                             </Col>
                             <Col>
+                                <METAMASK />
+                            </Col>
+                            <Col>
                                 <ConnectWalletButton />
                             </Col>
                         </Row>
@@ -90,7 +93,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     textAlign: 'center',
                 }}
             >
-                © 2022 All rights reserved by Web3-Master.
+                BUILT AT ETH WARSAW $ NOSLEEP - MX
             </Footer>
         </Layout>
     );

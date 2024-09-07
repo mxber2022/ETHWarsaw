@@ -143,7 +143,7 @@ export default function VerifyPannel() {
         onChange={onFileSelected}
       />
       <Row justify="center">
-        <Col>
+        {/* <Col>
           <a href="https://zkverify.io" target="_blank" rel="noopener noreferrer">
             <img
               src="/zk_Verify_logo_full_white.png"
@@ -151,7 +151,7 @@ export default function VerifyPannel() {
               style={{ height: '50px', verticalAlign: 'middle' }}
             />
           </a>
-        </Col>
+        </Col> */}
       </Row>
       <Spin
         spinning={verifying}
