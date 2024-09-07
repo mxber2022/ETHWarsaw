@@ -28,7 +28,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     <Col flex="1" />
                     <Col flex="none">
                         <Row align="middle" justify="center">
-                            <Image src={logo.src} width={40} height={40} alt="logo" />
+                            {/* <Image src={logo.src} width={40} height={40} alt="logo" /> */}
                             <h1
                                 style={{
                                     color: 'white',
@@ -65,13 +65,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     <Col flex="1">
                         <Row align="middle" justify="end" gutter={20}>
                             <Col>
-                                <a
+                                {/* <a
                                     href={GITHUB_PROJECT}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
                                     <GithubOutlined style={{ fontSize: 20, color: 'white' }} />
-                                </a>
+                                </a> */}
                             </Col>
                             <Col>
                                 <ConnectWalletButton />

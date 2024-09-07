@@ -61,7 +61,7 @@ const ConnectWalletButton: React.FC = () => {
                 className={selectedAccount ? 'connectedButton' : 'connectButton'}
                 onClick={handleWalletConnectOpen}
             >
-                {selectedAccount ? `Connected: ${selectedAccount.slice(0, 6)}...${selectedAccount.slice(-4)}` : 'Connect Wallet'}
+                {selectedAccount ? `Connected: ${selectedAccount.slice(0, 6)}...${selectedAccount.slice(-4)}` : 'Connect Polkadot'}
             </Button>
 
             {isWalletSelectOpen && (
