@@ -188,7 +188,7 @@ const PlayPannel: React.FC = () => {
           <Row gutter={20} justify="center" style={{ marginTop: 10 }}>
             <Col>
               <Button type="primary" onClick={onGenerateProof}>
-                Generate Proof
+                Generate Proof 
               </Button>
             </Col>
             <Col>
