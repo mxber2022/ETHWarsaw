@@ -1,0 +1,5 @@
+1,1,0,main.feedbackIsValid
+2,2,0,main.nullifierOutput
+3,-1,0,main.userPublicKey
+4,-1,0,main.feedbackHash
+5,-1,0,main.nullifier
