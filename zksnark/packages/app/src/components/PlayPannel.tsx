@@ -102,10 +102,10 @@ const PlayPannel: React.FC = () => {
           "b": 11
         };
   
-        
+        console.log("hello");
         // @ts-expect-error Global snarkjs usage from `public/snarkjs.min.js`
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-          {a: 3, b: 11},
+          {a: 3, b: 1},
           'sudoku.wasm',
           'sudoku_1.zkey'
         );

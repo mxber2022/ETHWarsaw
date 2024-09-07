@@ -44,3 +44,4 @@ echo "Cleaning up intermediate files..."
 #rm ${CIRCUIT_NAME}_0.zkey
 
 echo "Process completed successfully!"
+ 

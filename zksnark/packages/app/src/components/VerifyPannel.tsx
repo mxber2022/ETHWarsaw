@@ -4,7 +4,7 @@ import ProofView from './ProofView';
 import PuzzleView from './PuzzleView';
 import { useZkVerify } from '../hooks/useZkVerify';
 import { useAccount } from "../contexts/AccountContext";
-import { VerifyTransactionInfo } from "zkverifyjs";
+import { VerifyTransactionInfo, zkVerifySession, MerkleProof } from "zkverifyjs";
 const snarkjs = require("snarkjs");
 
 export default function VerifyPannel() {
@@ -90,16 +90,43 @@ export default function VerifyPannel() {
       console.log("v",vkey);
     }
 
-    const { proof: pf, publicSignals: ps } = await snarkjs.groth16.fullProve({a: 3, b: 11}, "sudoku.wasm", "sudoku_1.zkey");
+    const { proof: pf, publicSignals: ps } = await snarkjs.groth16.fullProve({a: 3, b: 1}, "sudoku.wasm", "sudoku_1.zkey");
     const res = await snarkjs.groth16.verify(vkey, ps, pf);
     console.log("res", res);
+
+    const calldata = await snarkjs.groth16.exportSolidityCallData(pf,ps);
+    console.log("calldata", calldata);
 
     const transactionInfo = await onVerifyProof(JSON.stringify(pf), ps, vkey);
     if (transactionInfo) {
       message.success(`Verified Successfully on zkVerify - AttestationId: ${transactionInfo.attestationId}`);
       downloadTransactionInfo(transactionInfo);
     }
+
   };
+
+  async function se() {
+    let zkVerifySession;
+      try {
+        zkVerifySession = (await import('zkverifyjs')).zkVerifySession;
+      } catch (error: unknown) {
+        throw new Error(
+          `Failed to load zkVerifySession: ${(error as Error).message}`
+        );
+      }
+
+      let session;
+      try {
+        session = await zkVerifySession.start().Testnet().withWallet();
+      } catch (error: unknown) {
+        throw new Error(`Connection failed: ${(error as Error).message}`);
+      }
+
+      const proofDetails = await session.poe(7013, "0x4acd015d47415fd5d2b41660b5c9b9e9039f6b837a726cd223d5a34c3b08e553");
+      console.log(proofDetails);
+  }
+
+  
 
   return (
     <>
@@ -162,6 +189,7 @@ export default function VerifyPannel() {
               <Button type="primary" onClick={handleVerifyClick}>
                 Verify Proof
               </Button>
+              <button onClick={se}>cli</button>
             </Col>
           </Row>
         </Card>
