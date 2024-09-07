@@ -8,6 +8,8 @@ import { useSindri } from '../hooks/useSindri';
 import { VerifyTransactionInfo } from "zkverifyjs";
 import { useZkVerify } from '../hooks/useZkVerify';
 import { useAccount } from "../contexts/AccountContext";
+import { SDKProvider, useSDK } from "@metamask/sdk-react";
+import {ethers} from "ethers"
 const snarkjs = require("snarkjs");
 
 const PlayPannel: React.FC = () => {
@@ -25,6 +27,10 @@ const PlayPannel: React.FC = () => {
   const { selectedAccount } = useAccount();
   const { verifying, verified, error:x, onVerifyProof } = useZkVerify(selectedAccount);
 
+  const { sdk, connected, connecting, provider, chainId } = useSDK(); 
+
+  console.log("provider", provider);
+  console.log("connected", connected);
   useEffect(() => {
     if (error) {
       messageApi.error(error);
@@ -164,6 +170,8 @@ const PlayPannel: React.FC = () => {
             console.log("transactionInfo: ", transactionInfo)
           }
       
+          /* Call your ethereum contract  */
+          await test(transactionInfo?.attestationId, transactionInfo?.leafDigest, [], 1, 0);
 
       }
     } catch (error) {
@@ -175,6 +183,63 @@ const PlayPannel: React.FC = () => {
       setProofCalculating(false);
     }
   };
+
+
+
+  async function test(attestationId: any, leaf: any, merklePath: any, leafCount: any, index: any) {
+    // Initialize Infura provider
+    const provider = new ethers.providers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/kaFl069xyvy3np41aiUXwjULZrF67--t");
+    console.log('Provider:', provider);
+
+    // Create a signer (Infura does not provide a signer, so this part is not correct)
+    // We need MetaMask or a private key for signing transactions, not an Infura provider
+    // The following line will cause an issue
+    // const signer = provider.getSigner(); // This will not work with JsonRpcProvider
+
+    // Correct approach: Use a Web3Provider with MetaMask for transactions
+    // const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+    // console.log('Signer:', signer);
+
+    const abi = [
+        'function callVerifyProofAttestation(uint256 _attestationId, bytes32 _leaf, bytes32[] calldata _merklePath, uint256 _leafCount, uint256 _index) external returns (bool)'
+    ];
+    const contractAddress = '0x0Bb976ef70dAf0F9C7Aef7CA1A3F02b96881C23E';
+    const contract = new ethers.Contract(contractAddress, abi, provider);
+
+    try {
+        // Populate the transaction data
+        const txRequest = await contract.populateTransaction.callVerifyProofAttestation(
+            "7013",
+            "0x4acd015d47415fd5d2b41660b5c9b9e9039f6b837a726cd223d5a34c3b08e553",
+            [],
+            1,
+            0
+        );
+
+        // Use MetaMask provider to sign and send the transaction
+        //@ts-ignore
+        const metaMaskProvider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = metaMaskProvider.getSigner();
+        console.log('Signer:', signer);
+
+        // Send the transaction
+        const txResponse = await signer.sendTransaction({
+            to: contractAddress,
+            data: txRequest.data,
+            gasLimit: txRequest.gasLimit,
+            gasPrice: txRequest.gasPrice
+        });
+
+        console.log('Transaction response:', txResponse);
+
+        // Wait for transaction confirmation
+        const receipt = await txResponse.wait();
+        console.log('Transaction receipt:', receipt);
+
+    } catch (error) {
+        console.error('Error calling contract function:', error);
+    }
+}
 
   const onSaveProof = () => {
     if (proof === '') {
@@ -280,11 +345,11 @@ const PlayPannel: React.FC = () => {
                 Generate Proof 
               </Button> */}
             </Col>
-            <Col>
-              {/* <Button type="primary" onClick={onSaveProof}>
+            {/* <Col>
+              <Button type="primary" onClick={test}>
                 Save Proof
-              </Button> */}
-            </Col>
+              </Button>
+            </Col> */}
           </Row>
         </Card>
       </Spin>

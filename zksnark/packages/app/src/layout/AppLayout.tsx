@@ -65,15 +65,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     <Col flex="1">
                         <Row align="middle" justify="end" gutter={20}>
                             <Col>
-                                {/* <a
-                                    href={GITHUB_PROJECT}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <GithubOutlined style={{ fontSize: 20, color: 'white' }} />
-                                </a> */}
-                            </Col>
-                            <Col>
                                 <METAMASK />
                             </Col>
                             <Col>

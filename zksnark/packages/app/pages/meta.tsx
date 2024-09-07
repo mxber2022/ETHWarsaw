@@ -23,16 +23,12 @@ export const METAMASK = () => {
   };
 
   return (
-    <div className="App">
-      <button onClick={connect} disabled={connecting || loading}>
-        {loading ? "Connecting..." : "Connect"}
-      </button>
-      {connected && (
-        <div>
-          <p>{chainId && `Connected chain: ${chainId}`}</p>
-          <p>{account && `Connected account: ${account}`}</p>
-        </div>
-      )}
-    </div>
+    <div className="c">
+    <button className="cbtm" onClick={connect} disabled={connecting || loading}>
+      {loading ? "Connecting..." : "Connected"}
+    </button>
+  
+</div>
+
   );
 };
