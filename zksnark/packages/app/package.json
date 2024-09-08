@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ant-design/colors": "^6.0.0",
+    "@ensdomains/ens-avatar": "^0.3.3",
     "@metamask/sdk-react": "^0.28.2",
     "@next/env": "^13.0.7",
     "@next/font": "13.0.6",
