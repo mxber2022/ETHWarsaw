@@ -8,6 +8,7 @@ ZKFeedback is a decentralized feedback system leveraging zero-knowledge proofs t
 - **Public Feedback**: Feedback remains publicly accessible, ensuring transparency.
 - **Sentiment Analysis**: Integrated with ORA Ai to analyze feedback sentiment through smart contracts.
 - **Efficient Storage**: Utilizes dbforest SQL database for robust and scalable feedback storage.
+- **ENS**: Resolving address to ens.
 
 ## Getting Started
 
