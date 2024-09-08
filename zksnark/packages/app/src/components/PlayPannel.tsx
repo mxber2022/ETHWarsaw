@@ -13,6 +13,9 @@ import {ethers} from "ethers"
 import { exit } from 'process';
 const snarkjs = require("snarkjs");
 
+import { LoadingOutlined } from '@ant-design/icons';
+import { Flex} from 'antd'
+
 const PlayPannel: React.FC = () => {
 
   const [proof, setProof] = useState<string>('');
@@ -408,7 +411,7 @@ async function airesult (){
           <Typography.Title level={3}></Typography.Title>
         </Col>
       </Row>
-      <Spin spinning={proofCalculating || proofGenerating} tip="Processing please wait..." size="large">
+      <Spin indicator={<LoadingOutlined spin />} spinning={proofCalculating || proofGenerating} tip="Processing please wait..." size="large">
         <Card title="Enter Feedback">
           <Row>
             {/* <Col span={20}>

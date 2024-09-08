@@ -156,3 +156,7 @@ padding-bottom: 10px;
 }
 .btmy:hover{
 }
+
+.ant-spin-text {
+  color: white;
+}
