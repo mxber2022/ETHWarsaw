@@ -1,7 +1,7 @@
 .connectButton {
     background-color: #FFFFFF;
-    color: #050506;
-    border: none;
+    color: black;
+    
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
@@ -14,7 +14,7 @@
 }
 
 .connectedButton {
-    background-color: #26DB8D;
+    background-color: #060d0a;
     color: white;
     border: none;
     padding: 10px 20px;

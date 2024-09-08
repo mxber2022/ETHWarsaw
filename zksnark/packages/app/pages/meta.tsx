@@ -25,7 +25,7 @@ export const METAMASK = () => {
   return (
     <div className="c">
     <button className="cbtm" onClick={connect} disabled={connecting || loading}>
-      {loading ? "Connecting..." : "Connected"}
+      {account ? "Connected" : "Connect Metamask"}
     </button>
   
 </div>

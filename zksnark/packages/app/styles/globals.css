@@ -107,12 +107,12 @@ a {
 }
 
 .ant-spin-dot-item {
-  background-color: #26DB8D!important;
+  background-color: #0ba9a9!important;
 }
 
 .c {
  
-
+padding-bottom: 10px;
 }
 
 .cbtm {
@@ -125,4 +125,13 @@ a {
   cursor: pointer;
   transition: background-color 0.3s ease;
   
+}
+
+.cbtm:hover {
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }

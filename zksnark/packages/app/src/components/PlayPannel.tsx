@@ -10,6 +10,7 @@ import { useZkVerify } from '../hooks/useZkVerify';
 import { useAccount } from "../contexts/AccountContext";
 import { SDKProvider, useSDK } from "@metamask/sdk-react";
 import {ethers} from "ethers"
+import { exit } from 'process';
 const snarkjs = require("snarkjs");
 
 const PlayPannel: React.FC = () => {
@@ -127,9 +128,39 @@ const PlayPannel: React.FC = () => {
             //downloadTransactionInfo(transactionInfo);
             console.log("transactionInfo: ", transactionInfo)
           }
-      
+
+         // const resp = await stat_us(transactionInfo?.attestationId, transactionInfo?.leafDigest)
+
+
+         const maxRetries = 15; // Max number of retries
+         const retryDelay = 10000; // 10 seconds delay (in milliseconds)
+         const postResponseDelay = 15000; // 15 seconds delay after a successful response
+         
+         for (let attempt = 1; attempt <= maxRetries; attempt++) {
+             try {
+                 // Replace `stat_us` with your function to call the smart contract
+                 const resp = await stat_us(transactionInfo?.attestationId, transactionInfo?.leafDigest);
+                 console.log("resp",resp);
+         
+                 // Wait an additional 15 seconds after a successful response
+                 await new Promise(resolve => setTimeout(resolve, postResponseDelay));
+         
+                 await test(transactionInfo?.attestationId, transactionInfo?.leafDigest, [], 1, 0);
+                 //return;
+             } catch (error) {
+                 console.error(`Attempt ${attempt} failed: ${error}`);
+                 if (attempt < maxRetries) {
+                     console.log(`Retrying in ${retryDelay / 1000} seconds...`);
+                     await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait before retrying
+                 } else {
+                     throw new Error(`Failed after ${maxRetries} attempts: ${error}`);
+                 }
+             }
+         }
+
+          
           /* Call your ethereum contract  */
-          await test(transactionInfo?.attestationId, transactionInfo?.leafDigest, [], 1, 0);
+          // await test(transactionInfo?.attestationId, transactionInfo?.leafDigest, [], 1, 0);
 
       }
     } catch (error) {
@@ -142,6 +173,26 @@ const PlayPannel: React.FC = () => {
     }
   };
 
+  async function stat_us(attestationId: any, leaf: any) {
+    let zkVerifySession;
+      try {
+        zkVerifySession = (await import('zkverifyjs')).zkVerifySession;
+      } catch (error: unknown) {
+        throw new Error(
+          `Failed to load zkVerifySession: ${(error as Error).message}`
+        );
+      }
+
+      let session;
+      try {
+        session = await zkVerifySession.start().Testnet().withWallet();
+      } catch (error: unknown) {
+        throw new Error(`Connection failed: ${(error as Error).message}`);
+      }
+
+      const proofDetails = await session.poe(attestationId, leaf);
+      console.log(proofDetails);
+  }
 
 
   async function test(attestationId: any, leaf: any, merklePath: any, leafCount: any, index: any) {
@@ -152,7 +203,7 @@ const PlayPannel: React.FC = () => {
     const abi = [
         'function callVerifyProofAttestation(uint256 _attestationId, bytes32 _leaf, bytes32[] calldata _merklePath, uint256 _leafCount, uint256 _index) external returns (bool)'
     ];
-    const contractAddress = '0x0Bb976ef70dAf0F9C7Aef7CA1A3F02b96881C23E';
+    const contractAddress = '0xa5a0A35F52541B8AF3e31F24Fa5Da28fb74b456A';
     const contract = new ethers.Contract(contractAddress, abi, provider);
 
     try {
@@ -184,7 +235,7 @@ const PlayPannel: React.FC = () => {
         // Wait for transaction confirmation
         const receipt = await txResponse.wait();
         console.log('Transaction receipt:', receipt);
-
+        return;
     } catch (error) {
         console.error('Error calling contract function:', error);
     }
@@ -203,7 +254,7 @@ const PlayPannel: React.FC = () => {
           <Typography.Title level={3}></Typography.Title>
         </Col>
       </Row>
-      <Spin spinning={proofCalculating || proofGenerating} tip="Proof generating..." size="large">
+      <Spin spinning={proofCalculating || proofGenerating} tip="Processing please wait..." size="large">
         <Card title="Enter Feedback">
           <Row>
             {/* <Col span={20}>

@@ -1,4 +1,4 @@
-import { purple } from '@ant-design/colors';
+import { grey, purple } from '@ant-design/colors';
 import dynamic from 'next/dynamic';
 import { Col, Layout, Row } from 'antd';
 import { Content, Footer, Header } from 'antd/lib/layout/layout';
@@ -15,13 +15,15 @@ const GithubOutlined = dynamic(() => import('@ant-design/icons').then(mod => mod
 
 export default function AppLayout({ children }: { children: ReactNode }) {
     return (
-        <Layout style={{ minHeight: '100vh' }}>
+        <Layout style={{ minHeight: '120vh' }}>
             <Header
                 style={{
                     position: 'fixed',
                     zIndex: 1,
                     width: '100%',
                     background: purple.primary,
+                    backgroundColor: "black",
+                    border: "2px solid grey"
                 }}
             >
                 <Row align="middle" justify="space-between" style={{ height: '100%' }}>
@@ -82,6 +84,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     position: 'sticky',
                     bottom: 0,
                     textAlign: 'center',
+                    backgroundColor:"black",
+                    color: "white",
+                    border: "2px solid grey"
                 }}
             >
                 BUILT AT ETH WARSAW $ NOSLEEP - MX
