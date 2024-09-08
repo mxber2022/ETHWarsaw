@@ -1,6 +1,6 @@
 # ZKFeedback
 
-ZKFeedback is a decentralized feedback system leveraging zero-knowledge proofs to ensure user privacy while providing transparent and public feedback. This project utilizes zkverifier for generating zero-knowledge proofs and Cost-effective Proof Verification where the user's wallet remains private, dbforest SQL for feedback storage, and ORA Ai for sentiment analysis through smart contracts.
+ZKFeedback is a decentralized feedback system leveraging zero-knowledge proofs to ensure user privacy while providing transparent and public feedback. This project utilizes zkverifier for generating zero-knowledge proofs and Cost-effective Proof Verification where the user's wallet remains private, dbforest SQL for  storage feedback, and ORA Ai for sentiment analysis through smart contracts. Also used ENS for name resolution.
 
 ## contract 
 
