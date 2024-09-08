@@ -69,6 +69,38 @@ const PlayPannel: React.FC = () => {
       console.log("b", feedback);
       console.log("account",account)
 
+
+
+      /**
+       store feedback in database
+       */
+
+
+       try {
+        const response = await fetch('http://localhost:5001/api/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ feedback }),
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          console.log('Feedback submitted successfully');
+        } else {
+          console.log(data.message || 'Error submitting feedback');
+        }
+      } catch (error) {
+        console.log('Error submitting feedback');
+        console.error('Error:', error);
+      }
+
+
+
+
+
   
     
       // Use TextEncoder to get bytes from the string
