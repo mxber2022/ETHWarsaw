@@ -278,6 +278,128 @@ const PlayPannel: React.FC = () => {
     setFeedback(event.target.value);
   };
 
+  const [result, setResult] = useState<string>('');
+  async function sentiment() {
+
+    const provider = new ethers.providers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/kaFl069xyvy3np41aiUXwjULZrF67--t");
+    console.log('Provider:', provider);
+    
+    const abi = [
+        'function calculateAIResult(uint256 modelId, string calldata prompt) payable external'
+    ];
+    const contractAddress = '0xe75af5294f4CB4a8423ef8260595a54298c7a2FB';
+    const contract = new ethers.Contract(contractAddress, abi, provider);
+    let prompt = "give sentimentanalysis in 1 word. The feedhack are. The hackathon was good";
+
+    interface Feedback {
+      id: number;
+      Message: string;
+      CreatedAt: string;
+    }
+    
+    // Fetch the feedback and concatenate the messages to the prompt
+    fetch('http://localhost:5001/api/feedback')
+  .then(response => response.json())
+  .then((data: Feedback[]) => {
+    // Extract messages from the data and concatenate them to the prompt
+    const feedbackMessages = data.map(item => item.Message).join(". ");
+    prompt += ". " + feedbackMessages;
+
+    // Log the result after concatenation
+    console.log("px: ",prompt);
+  })
+  .catch(error => console.error('Error fetching feedback:', error));
+
+      console.log("p1", prompt);
+    try {
+        // Populate the transaction data for the calculateAIResult function
+        const txRequest = await contract.populateTransaction.calculateAIResult(
+            11,
+            prompt
+        );
+    
+        // Use MetaMask provider to sign and send the transaction
+        //@ts-ignore
+        const metaMaskProvider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = metaMaskProvider.getSigner();
+        console.log('Signer:', signer);
+    
+        // Send the transaction with a specified amount of ETH (for payable)
+        const txResponse = await signer.sendTransaction({
+            to: contractAddress,
+            data: txRequest.data,
+            gasLimit: txRequest.gasLimit || ethers.utils.hexlify(1000000), // Optional: add default gasLimit
+            gasPrice: txRequest.gasPrice || await provider.getGasPrice(),  // Optional: add default gasPrice
+            value: ethers.utils.parseEther("0.1") // Specify the amount of ETH to send
+        });
+    
+        console.log('Transaction response:', txResponse);
+    
+        // Wait for transaction confirmation
+        const receipt = await txResponse.wait();
+        console.log('Transaction receipt:', receipt);
+
+
+
+
+       // const provider = new ethers.providers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/kaFl069xyvy3np41aiUXwjULZrF67--t");
+       // console.log('Provider:', provider);
+       setTimeout(async () => {
+
+        const abis = [
+          'function getAIResult(uint256 modelId, string calldata prompt) external view returns (string memory)'
+      ];
+      const contractAddresss = '0xe75af5294f4CB4a8423ef8260595a54298c7a2FB';
+      const contracts = new ethers.Contract(contractAddresss, abis, provider);
+      
+      try {
+          // Call the getAIResult function
+          console.log("p2", prompt);
+          let resultx = await contracts.getAIResult(11, "give sentimentanalysis in 1 word. The feedhack are. The hackathon was good");
+          setResult(resultx)
+          console.log('AI Result:', result);
+          return result;
+      } catch (error) {
+          console.error('Error calling contract function:', error);
+      }
+        console.log('50 seconds have passed');
+    }, 30000); // 20000 milliseconds = 20 seconds
+
+        
+
+
+
+
+        return;
+    } catch (error) {
+        console.error('Error calling contract function:', error);
+    }
+
+  }
+
+async function airesult (){
+  const provider = new ethers.providers.JsonRpcProvider("https://eth-sepolia.g.alchemy.com/v2/kaFl069xyvy3np41aiUXwjULZrF67--t");
+
+      const abis = [
+          'function getAIResult(uint256 modelId, string calldata prompt) external view returns (string memory)'
+      ];
+      const contractAddresss = '0xe75af5294f4CB4a8423ef8260595a54298c7a2FB';
+      const contracts = new ethers.Contract(contractAddresss, abis, provider);
+
+      try {
+          // Call the getAIResult function
+          console.log("p2", prompt);
+          let resultx = await contracts.getAIResult(11, "give sentimentanalysis in 1 word. The feedhack are. The hackathon was good");
+          setResult(resultx)
+          console.log('AI Result:', result);
+          return result;
+      } catch (error) {
+          console.error('Error calling contract function:', error);
+      }
+
+}
+
+
   return (
     <>
       {contextHolder}
@@ -363,13 +485,23 @@ const PlayPannel: React.FC = () => {
                 Generate Proof 
               </Button> */}
             </Col>
-            {/* <Col>
-              <Button type="primary" onClick={test}>
-                Save Proof
+            <Col>
+              <Button onClick={sentiment} className='btmy'>
+                SentimentAnalysis 
               </Button>
+               <>--</>{result}
+            </Col>
+
+            {/* <Col>
+              <Button onClick={airesult} className='btmy'>
+                res
+              </Button>
+               <>--</>{result}
             </Col> */}
           </Row>
+          
         </Card>
+
       </Spin>
     </>
   );
