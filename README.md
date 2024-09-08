@@ -1,6 +1,10 @@
 # ZKFeedback
 
-ZKFeedback is a decentralized feedback system leveraging zero-knowledge proofs to ensure user privacy while providing transparent and public feedback. This project utilizes zkverifier for generating zero-knowledge proofs where the user's wallet remains private, dbforest SQL for feedback storage, and ORA Ai for sentiment analysis through smart contracts.
+ZKFeedback is a decentralized feedback system leveraging zero-knowledge proofs to ensure user privacy while providing transparent and public feedback. This project utilizes zkverifier for generating zero-knowledge proofs and Cost-effective Proof Verification where the user's wallet remains private, dbforest SQL for feedback storage, and ORA Ai for sentiment analysis through smart contracts.
+
+## contract 
+
+https://sepolia.etherscan.io/address/0xa5a0A35F52541B8AF3e31F24Fa5Da28fb74b456A - solidity Verifier
 
 ## Features
 
